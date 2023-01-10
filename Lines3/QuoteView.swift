@@ -204,7 +204,7 @@ struct QuoteView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             QuoteView(company: "Alphabet", urlBase: "19TDFpg-if9cbsz_QwPP0MIa3xQreb3M-", ticker: "GOOG")
-                .navigationTitle("<")
+                .navigationBarTitle("<", displayMode: .inline)
         }
     }
 }
