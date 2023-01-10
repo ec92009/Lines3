@@ -42,7 +42,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Series")
+            .navigationTitle("Companies")
         }
         .onAppear {
             tables.removeAll()
