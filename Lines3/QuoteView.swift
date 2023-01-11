@@ -78,76 +78,110 @@ struct QuoteView: View {
     @State private var selectedRange: ChartRange = .d3m
     
     var body: some View {
-        VStack {
-            HStack {
-                Spacer()
-                VStack(alignment: .trailing) {
-                    Text(company)
-                        .font(.largeTitle)
-                    Text(ticker)
-                        .font(.title)
-                }
-                Spacer()
-                VStack(alignment: .leading) {
-                    Text("Average Close: \(String(format: "$%.2f", stats.avgClose))")
-                    Text("Min: \(String(format: "$%.2f", stats.minLow))")
-                    Text("Max: \(String(format: "$%.2f", stats.maxHigh))")
-                    Text("Close: \(String(format: "$%.2f", stats.lastClose))")
-                        .font(.title3)
-                        .bold()
-                        .foregroundColor(.blue)
-                    Text("On: \(stats.lastDay)")
-                        .foregroundColor(.blue)
-                }
-                .font(.subheadline)
-                Spacer()
-            }
-            .background(Color.green.opacity(0.3))
-            Picker("Range", selection: $selectedRange.animation(.easeOut(duration: 1))) {
-                Text("daily").tag(ChartRange.d3m)
-                Text("quarterly").tag(ChartRange.q)
-            }
-            .pickerStyle(.segmented)
-            .background(Color.green.opacity(0.5))
-            ScrollView(.vertical,showsIndicators: false) {
-                ZStack {
-                    Chart (items) {
-                        RectangleMark(
-                            x: .value("Date", $0.day),
-                            yStart: .value("Start", 0),
-                            yEnd: .value("Close", $0.close),
-                            width: 4
-                        )
-                        .foregroundStyle(Color.green.opacity(0.8))
-                        RectangleMark(
-                            x: .value("Date", $0.day),
-                            yStart: .value("", 0),
-                            yEnd: .value("High", $0.volume/stats.maxVolume*stats.maxHigh/5),
-                            width: 4
-                        )
-                        .foregroundStyle(Color.blue.opacity(0.3))
+        GeometryReader { geo in
+//            let hz = geo.frame(in: .global).height
+//            let vt = geo.frame(in: .global).width
+            ZStack {
+                if geo.size.height > geo.size.width {
+                    // Portrait
+                    VStack {
+                        Header(vertical: true, company: company, ticker: ticker, stats: stats)
+                        Picker("Range", selection: $selectedRange.animation(.easeOut(duration: 1))) {
+                            Text("daily").tag(ChartRange.d3m)
+                            Text("quarterly").tag(ChartRange.q)
+                        }
+                        .pickerStyle(.segmented)
+                        .background(Color.green.opacity(0.5))
+                         
+                            ZStack {
+                                Chart (items) {
+                                    RectangleMark(
+                                        x: .value("Date", $0.day),
+                                        yStart: .value("Start", 0),
+                                        yEnd: .value("Close", $0.close),
+                                        width: 4
+                                    )
+                                    .foregroundStyle(Color.green.opacity(0.8))
+                                    RectangleMark(
+                                        x: .value("Date", $0.day),
+                                        yStart: .value("", 0),
+                                        yEnd: .value("High", $0.volume/stats.maxVolume*stats.maxHigh/5),
+                                        width: 4
+                                    )
+                                    .foregroundStyle(Color.blue.opacity(0.3))
+                                }
+                                .frame(height: 400)
+                                .padding(.horizontal)
+                                .background()
+                                .accentColor(/*@START_MENU_TOKEN@*/.pink/*@END_MENU_TOKEN@*/)
+                            }
+                            .background(Color.green.opacity(0.3))
+                        
                     }
-                    .frame(height: 400)
-                    .padding(.horizontal)
-                    .background()
-                    .accentColor(/*@START_MENU_TOKEN@*/.pink/*@END_MENU_TOKEN@*/)
-                }
-                .onChange(of: selectedRange) { range in
-                    switch range {
-                    case .d3m:
+                    .onChange(of: selectedRange) { range in
+                        switch range {
+                        case .d3m:
+                            loadData(rangeCode: "D3M")
+                        case .q:
+                            loadData(rangeCode: "Q")
+                        }
+                    }
+                    .onAppear() {
                         loadData(rangeCode: "D3M")
-                    case .q:
-                        loadData(rangeCode: "Q")
                     }
+                } else {
+                    HStack {
+                        Header(vertical: false, company: company, ticker: ticker, stats: stats)
+                        Spacer()
+                        VStack {
+                            Picker("Range", selection: $selectedRange.animation(.easeOut(duration: 1))) {
+                                Text("daily").tag(ChartRange.d3m)
+                                Text("quarterly").tag(ChartRange.q)
+                            }
+                            .pickerStyle(.segmented)
+                            .background(Color.green.opacity(0.5))
+                            ZStack {
+                                Chart (items) {
+                                    RectangleMark(
+                                        x: .value("Date", $0.day),
+                                        yStart: .value("Start", 0),
+                                        yEnd: .value("Close", $0.close),
+                                        width: 4
+                                    )
+                                    .foregroundStyle(Color.green.opacity(0.8))
+                                    RectangleMark(
+                                        x: .value("Date", $0.day),
+                                        yStart: .value("", 0),
+                                        yEnd: .value("High", $0.volume/stats.maxVolume*stats.maxHigh/5),
+                                        width: 4
+                                    )
+                                    .foregroundStyle(Color.blue.opacity(0.3))
+                                }
+                                .frame(height: geo.size.height * 0.9)
+                                .padding(.horizontal)
+                                .background()
+                                .accentColor(/*@START_MENU_TOKEN@*/.pink/*@END_MENU_TOKEN@*/)
+                            }
+                            .background(Color.green.opacity(0.3))
+                        }
+                        .onChange(of: selectedRange) { range in
+                            switch range {
+                            case .d3m:
+                                loadData(rangeCode: "D3M")
+                            case .q:
+                                loadData(rangeCode: "Q")
+                            }
+                        }
+                        .onAppear() {
+                            loadData(rangeCode: "D3M")
+                        }
+                    }
+
                 }
-                .onAppear() {
-                    loadData(rangeCode: "D3M")
-                }
-                .background(Color.green.opacity(0.3))
+
             }
         }
     }
-    
     func loadData(rangeCode: String) {
         var minLow = Double.greatestFiniteMagnitude
         var maxHigh = 0.0
