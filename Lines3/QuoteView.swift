@@ -79,8 +79,6 @@ struct QuoteView: View {
     
     var body: some View {
         GeometryReader { geo in
-//            let hz = geo.frame(in: .global).height
-//            let vt = geo.frame(in: .global).width
             ZStack {
                 if geo.size.height > geo.size.width {
                     // Portrait
@@ -101,22 +99,21 @@ struct QuoteView: View {
                                         yEnd: .value("Close", $0.close),
                                         width: 4
                                     )
-                                    .foregroundStyle(Color.green.opacity(0.8))
+                                    .foregroundStyle(Gradient(colors: [.green.opacity(1.0), .green.opacity(0.1)]))
                                     RectangleMark(
                                         x: .value("Date", $0.day),
                                         yStart: .value("", 0),
                                         yEnd: .value("High", $0.volume/stats.maxVolume*stats.maxHigh/5),
                                         width: 4
                                     )
-                                    .foregroundStyle(Color.blue.opacity(0.3))
+                                    .foregroundStyle(Color.blue.opacity(0.5))
                                 }
-                                .frame(height: 400)
+                                .frame(height: geo.size.height * 0.8)
                                 .padding(.horizontal)
                                 .background()
                                 .accentColor(/*@START_MENU_TOKEN@*/.pink/*@END_MENU_TOKEN@*/)
                             }
                             .background(Color.green.opacity(0.3))
-                        
                     }
                     .onChange(of: selectedRange) { range in
                         switch range {
@@ -130,6 +127,7 @@ struct QuoteView: View {
                         loadData(rangeCode: "D3M")
                     }
                 } else {
+                    // Landscape
                     HStack {
                         Header(vertical: false, company: company, ticker: ticker, stats: stats)
                         Spacer()
