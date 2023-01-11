@@ -11,7 +11,7 @@ import SwiftUI
 struct Lines3App: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            CompaniesView()
         }
     }
 }

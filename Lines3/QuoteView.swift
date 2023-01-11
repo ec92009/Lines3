@@ -79,7 +79,6 @@ struct QuoteView: View {
     
     var body: some View {
         VStack {
-            // GeometryReader { geometry in
             HStack {
                 Spacer()
                 VStack(alignment: .trailing) {
@@ -110,45 +109,45 @@ struct QuoteView: View {
             }
             .pickerStyle(.segmented)
             .background(Color.green.opacity(0.5))
-            ZStack {
-                GeometryReader { geo in
+            ScrollView(.vertical,showsIndicators: false) {
+                ZStack {
                     Chart (items) {
                         RectangleMark(
                             x: .value("Date", $0.day),
                             yStart: .value("Start", 0),
                             yEnd: .value("Close", $0.close),
-                            width: 2
+                            width: 4
                         )
-                        .foregroundStyle(Color.green.opacity(1))
+                        .foregroundStyle(Color.green.opacity(0.8))
                         RectangleMark(
                             x: .value("Date", $0.day),
                             yStart: .value("", 0),
-                            yEnd: .value("High", $0.volume*10/stats.maxVolume),
+                            yEnd: .value("High", $0.volume/stats.maxVolume*stats.maxHigh/5),
                             width: 4
                         )
-                        .foregroundStyle(Color.blue.opacity(0.4))
+                        .foregroundStyle(Color.blue.opacity(0.3))
                     }
                     .frame(height: 400)
                     .padding(.horizontal)
                     .background()
                     .accentColor(/*@START_MENU_TOKEN@*/.pink/*@END_MENU_TOKEN@*/)
                 }
-            }
-            .onChange(of: selectedRange) { range in
-                switch range {
-                case .d3m:
-                    loadData(rangeCode: "D3M")
-                case .q:
-                    loadData(rangeCode: "Q")
+                .onChange(of: selectedRange) { range in
+                    switch range {
+                    case .d3m:
+                        loadData(rangeCode: "D3M")
+                    case .q:
+                        loadData(rangeCode: "Q")
+                    }
                 }
+                .onAppear() {
+                    loadData(rangeCode: "D3M")
+                }
+                .background(Color.green.opacity(0.3))
             }
-            .onAppear() {
-                loadData(rangeCode: "D3M")
-            }
-            .background(Color.green.opacity(0.3))
         }
     }
-        
+    
     func loadData(rangeCode: String) {
         var minLow = Double.greatestFiniteMagnitude
         var maxHigh = 0.0

@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  CompaniesView.swift
 //  Lines
 //
 //  Created by Elie Cohen on 12/23/22.
@@ -23,7 +23,7 @@ struct DirectoryItem: Identifiable, Hashable {
     }
 }
 
-struct ContentView: View {
+struct CompaniesView: View {
     @State private var tables = [DirectoryItem]()
     
     var body: some View {
@@ -72,6 +72,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        CompaniesView()
     }
 }
