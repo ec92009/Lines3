@@ -26,12 +26,8 @@ struct DirectoryItem: Identifiable, Hashable {
 struct ContentView: View {
     @State private var tables = [DirectoryItem]()
     
-    let googleDriveFileID = "1M-A9bL1EmTjJTM1g6C7v0NS0mIJPk40h"
-    //https://drive.google.com/file/d/1M-A9bL1EmTjJTM1g6C7v0NS0mIJPk40h/view?usp=share_link
-    
-    
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List(tables, id:\.self) { table in
                 NavigationLink {
                     QuoteView(company: table.company, urlBase: table.id, ticker: table.ticker)
@@ -42,10 +38,11 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Companies")
+            .navigationBarTitle("Companies", displayMode: .automatic)
         }
         .onAppear {
-            tables.removeAll()
+//            tables.removeAll()
+            let googleDriveFileID = "1M-A9bL1EmTjJTM1g6C7v0NS0mIJPk40h"
             let urlString = "https://drive.google.com/uc?id=\(googleDriveFileID)"
             print(urlString)
             let url = URL(string:urlString)!

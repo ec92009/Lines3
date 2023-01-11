@@ -17,6 +17,7 @@ struct SingleTickerQuote: Identifiable {
     var id: UUID
     let key: String
     let day: Date
+    let rawDate: String
     let open: Double
     let high: Double
     let low: Double
@@ -34,6 +35,7 @@ struct SingleTickerQuote: Identifiable {
         dateFormatter.dateFormat = "yyyy-MM-dd"
         //let date = dateFormatter.date(from: dateString)
         self.day = dateFormatter.date(from:fields[1])!
+        self.rawDate = fields[1]
         self.open = Double(fields[2]) ?? 0.0
         self.high = Double(fields[3]) ?? 0.0
         self.low = Double(fields[4]) ?? 0.0
@@ -52,8 +54,9 @@ struct StatItems: Identifiable {
     var lastClose: Double
     var count: Int
     var maxVolume: Double
+    var lastDay: String
     
-    init (minLow: Double, maxHigh: Double, avgClose: Double, lastClose: Double, count: Int, maxVolume: Double) {
+    init (minLow: Double, maxHigh: Double, avgClose: Double, lastClose: Double, count: Int, maxVolume: Double, lastDay: String) {
         self.id = UUID()
         self.minLow = minLow
         self.maxHigh = maxHigh
@@ -61,20 +64,18 @@ struct StatItems: Identifiable {
         self.lastClose = lastClose
         self.count = count
         self.maxVolume = maxVolume
+        self.lastDay = lastDay
     }
 }
-
 
 struct QuoteView: View {
     let company: String
     let urlBase: String
     let ticker: String
 
-    
     @State private var items = [SingleTickerQuote]()
-    @State private var stats = StatItems(minLow: 0.0, maxHigh:  0.0, avgClose: 0.0, lastClose: 0.0, count: 0, maxVolume: 0.0)
+    @State private var stats = StatItems(minLow: 0.0, maxHigh:  0.0, avgClose: 0.0, lastClose: 0.0, count: 0, maxVolume: 0.0, lastDay: "2000-01-01")
     @State private var selectedRange: ChartRange = .d3m
-    
     
     var body: some View {
         VStack {
@@ -93,20 +94,22 @@ struct QuoteView: View {
                     Text("Min: \(String(format: "$%.2f", stats.minLow))")
                     Text("Max: \(String(format: "$%.2f", stats.maxHigh))")
                     Text("Close: \(String(format: "$%.2f", stats.lastClose))")
-                        .font(.headline)
+                        .font(.title3)
                         .bold()
+                        .foregroundColor(.blue)
+                    Text("On: \(stats.lastDay)")
                         .foregroundColor(.blue)
                 }
                 .font(.subheadline)
                 Spacer()
             }
-            .background(Color.red.opacity(0.3))
+            .background(Color.green.opacity(0.3))
             Picker("Range", selection: $selectedRange.animation(.easeOut(duration: 1))) {
                 Text("daily").tag(ChartRange.d3m)
                 Text("quarterly").tag(ChartRange.q)
             }
             .pickerStyle(.segmented)
-            .background(Color.red.opacity(0.5))
+            .background(Color.green.opacity(0.5))
             ZStack {
                 GeometryReader { geo in
                     Chart (items) {
@@ -142,7 +145,7 @@ struct QuoteView: View {
             .onAppear() {
                 loadData(rangeCode: "D3M")
             }
-            .background(Color.red.opacity(0.3))
+            .background(Color.green.opacity(0.3))
         }
     }
         
@@ -152,6 +155,7 @@ struct QuoteView: View {
         var maxVolume = 0.0
         var totClose = 0.0
         var itemCount = 0
+        var lastDate = ""
         
         items.removeAll()
         let urlString = "https://drive.google.com/uc?id=\(urlBase)"
@@ -182,13 +186,30 @@ struct QuoteView: View {
                                     }
                                     if item.volume > maxVolume {
                                         maxVolume = item.volume
-                                        stats.maxVolume = maxVolume
+                                        stats.maxVolume = item.volume
                                     }
+                                    lastDate = item.rawDate
                                 }
                             }
                         }
                         stats.avgClose = totClose / Double(itemCount)
                         stats.count = itemCount
+                        
+                        
+                        let dateString = lastDate
+                        let dateFormatter = DateFormatter()
+                        dateFormatter.dateFormat = "yyyy-MM-dd"
+
+                        if let date = dateFormatter.date(from: dateString) {
+                            dateFormatter.dateFormat = "dd-MMM-yyyy"
+                            let formattedDate = dateFormatter.string(from: date)
+                            print(formattedDate) // "31-Jan-2023"
+                            stats.lastDay = formattedDate
+                        } else {
+                            print("Invalid date string")
+                            stats.lastDay = ""
+                        }
+
                     } else {
                         print("could not convert data to string")
                     }
